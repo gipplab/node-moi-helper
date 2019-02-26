@@ -1,0 +1,10 @@
+id,title,classification,text
+1,A free boundary electrophotography,35R35 78A55 35J05,"(From the introduction.) ``In the process of photocopying a document,
+The authors include several references to the literature on electrophotography."
+2,A inequality with two weights,60G44 60E15,"Let $U,V$ be two positive uniformly integrable martingales such that $E U\sb \infty =E V\sb \infty =1$. Consider the properties:\par
+$W\sb p(U,V)$: There exists some positive $C\sb p$, such that $E(X\sp{*p}U\sb \infty)\le C\sb pE(\vert X\sb \infty\vert\sp pV\sb \infty)$ for every uniformly integrable martingale $X$;\par
+$A\sb p(U,V)$: $U\sb TE(V\sb \infty\sp{-1/(p-1)}\mid {\cal F}\sb T)\sp{p- 1}\le C\sb p'$ for some positive $C\sb p'$ and for every stopping time $T$.\par
+The author proves that for every $p>1$, the property $W\sb p(U,V)$ implies $A\sb p(U,V)$, and
+that $A\sb 2(U,V)$ does not necessarily imply $W\sb 2(U,V)$ and, surprisingly, that $W\sb p(U,V)$ does not imply $A\sb p(V,V)$."
+3,$SK\sb 1(\bbfZ[G])$ on spheres,19B28 57Q10 57S25,"The author determines $SK\sb 1(\bbfZ[G])$ for a finite solvable group $G$ acting freely and linearly on some sphere $S\sp{2n-1}$.
+However, the author achieves some short cuts by a careful examination of the structure of the groups concerned."
