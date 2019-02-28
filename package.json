@@ -4,7 +4,8 @@
   "dependencies": {
     "commander": "^2.19.0",
     "csv": "^5.1.1",
-    "js-yaml": "^3.12.1"
+    "js-yaml": "^3.12.1",
+    "preq": "^0.5.7"
   },
   "description": "Helper package to discover mathematical objects of interest",
   "main": "lib_/filter.js",
