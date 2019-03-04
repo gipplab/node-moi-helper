@@ -1,15 +1,8 @@
 import parse = require('csv-parse');
 import stringify = require('csv-stringify');
-import generate = require('csv-generate');
 import fs = require('fs');
 import yaml = require('js-yaml');
-
-interface Record {
-  id: number;
-  title: string;
-  classification: string,
-  text: string,
-}
+import { Record } from './record';
 
 function getIds(ymlIds: string) {
   const doc = yaml.safeLoad(fs.readFileSync(ymlIds, 'utf8'));

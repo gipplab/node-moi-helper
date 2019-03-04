@@ -1,21 +1,28 @@
 import parse = require('csv-parse');
 import stringify = require('csv-stringify');
 import fs = require('fs');
+import { Record } from './record';
 
 let preq: any = require('preq');
 
-interface Record {
-  id: number;
-  title: string;
-  classification: string,
-  text: string,
-  mml: string
-}
 
+function render(x:Record, stringifier: stringify.Stringifier ) {
+  return preq.post({
+      uri: 'https://latexml.mathweb.org/convert',
+      body: {
+        profile: 'fragment',
+        tex: x.text,
+      },
+    },
+  ).then((res: { body: { log: string, result: string }; }) => {
+    x.mml = res.body.result;
+    stringifier.write(x);
+  });
+}
 
 export const Convert = (inFile: string, outFile?: string) => {
   const inStream = fs.createReadStream(inFile);
-  const stringifier = stringify({ header: true });
+  const stringifier: stringify.Stringifier = stringify({ header: true });
   const parser = parse({ columns: true, cast: true });
   const output: Record[] = [];
   let recordSize = 0;
@@ -35,17 +42,8 @@ export const Convert = (inFile: string, outFile?: string) => {
       const renderings: Promise<Record>[] = [];
       output.forEach(x => {
         renderings.push(
-          preq.post({
-              uri: 'https://latexml.mathweb.org/convert',
-              body: {
-                profile: 'fragment',
-                tex: x.text,
-              },
-            },
-          ).then((res: { body: { log: string, result: string }; }) => {
-            x.mml = res.body.result;
-            stringifier.write(x);
-          }));
+          render(x, stringifier)
+        );
       });
       Promise.all(renderings).then(
         () => {
