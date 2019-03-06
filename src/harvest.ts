@@ -12,7 +12,7 @@ function getMws(record: Record, docID: number, outFile: string) {
   const select = xpath.useNamespaces({ 'm': 'http://www.w3.org/1998/Math/MathML' });
   const nodes = select('//m:math', parsed);
   if (nodes.length) {
-    let output = `<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-collection="${outFile}">`;
+    let output = `<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="zbl" data-collection="${outFile}">`;
     let i = 0;
     nodes.forEach(n => output += `<mws:expr url="${docID}#${i++}">\n${n.toString()}\n</mws:expr>`);
     output += '</mws:harvest>';

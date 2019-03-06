@@ -16,20 +16,22 @@
     "test": "test"
   },
   "devDependencies": {
+    "@types/chai": "^4.1.7",
     "@types/csv-parse": "^1.1.12",
-    "@types/jest": "^24.0.9",
     "@types/js-yaml": "^3.12.0",
+    "@types/mocha": "^5.2.6",
     "@types/node": "^11.9.5",
     "@types/xmldom": "^0.1.29",
-    "jest": "^24.1.0",
+    "chai": "^4.2.0",
+    "mocha": "^6.0.2",
     "prettier": "^1.16.4",
-    "ts-jest": "^24.0.0",
+    "ts-node": "^8.0.2",
     "tslint": "^5.13.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.3.3333"
   },
   "scripts": {
-    "test": "jest --config jestconfig.json",
+    "test": "mocha --require ts-node/register test/**/*.ts",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json"

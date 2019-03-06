@@ -1,5 +1,5 @@
-<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-collection="/tmp/Hyperelliptic Riemann surfaces"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://search.mathweb.org/ns ">
+<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="zbl"
+             data-collection="/tmp/Hyperelliptic Riemann surfaces">
     <mws:expr url="3#0">
         <math xmlns="http://www.w3.org/1998/Math/MathML" id="p1.1.m1.1" class="ltx_Math" alttext="SK_{1}(\bbfZ[G])"
               display="inline">
