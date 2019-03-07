@@ -6,6 +6,7 @@ import yaml = require('js-yaml');
 import xmlDom = require('xmldom');
 import xpath = require('xpath');
 
+
 function getMws(record: Record, docID: number, outFile: string) {
   const parser = new xmlDom.DOMParser();
   const parsed = parser.parseFromString(record.mml);

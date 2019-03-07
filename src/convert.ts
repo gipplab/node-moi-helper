@@ -6,18 +6,22 @@ import { Record } from './record';
 let preq: any = require('preq');
 
 
-function render(x:Record, stringifier: stringify.Stringifier ) {
-  return preq.post({
-      uri: 'https://latexml.mathweb.org/convert',
-      body: {
-        profile: 'fragment',
-        tex: x.text,
-      },
-    },
-  ).then((res: { body: { log: string, result: string }; }) => {
-    x.mml = res.body.result;
+function render(x: Record, stringifier: stringify.Stringifier) {
+  if (x.mml) {
     stringifier.write(x);
-  });
+  } else {
+    return preq.post({
+        uri: 'http://localhost:8080/convert',
+        body: {
+          profile: 'zbl',
+          tex: x.text,
+        },
+      },
+    ).then((res: { body: { log: string, result: string }; }) => {
+      x.mml = res.body.result;
+      stringifier.write(x);
+    });
+  }
 }
 
 export const Convert = (inFile: string, outFile?: string) => {
@@ -42,7 +46,7 @@ export const Convert = (inFile: string, outFile?: string) => {
       const renderings: Promise<Record>[] = [];
       output.forEach(x => {
         renderings.push(
-          render(x, stringifier)
+          render(x, stringifier),
         );
       });
       Promise.all(renderings).then(
