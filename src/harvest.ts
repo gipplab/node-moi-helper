@@ -13,6 +13,9 @@ const minimize = (mml: any) =>
     .toMinimalPmml(['id', 'xref', 'alttext', 'display', 'class', 'kmcs-r', 'stretchy']).toString();
 
 function getMws(record: Record, docID: number, outFile: string) {
+  if(!record ||!record.mml){
+    return;
+  }
   const parser = new xmlDom.DOMParser();
   const parsed = parser.parseFromString(record.mml);
   const select = xpath.useNamespaces({ 'm': 'http://www.w3.org/1998/Math/MathML' });
@@ -52,7 +55,7 @@ export const Harvest = (ymlIds: string, inFile: string, outFile: string) => {
   inStream.pipe(parser);
   one.then((dataset: Map<number, Record>) => {
     Object.keys(doc).map(key => {
-      const result = doc[key].forEach((docID: number) => {
+      const result = (doc[key]||[]).forEach((docID: number) => {
         const record = <Record> dataset.get(docID);
         let path = `${outFile}${key}`;
         if (!fs.existsSync(path)) {
