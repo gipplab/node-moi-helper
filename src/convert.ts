@@ -2,6 +2,7 @@ import parse = require('csv-parse');
 import stringify = require('csv-stringify');
 import fs = require('fs');
 import { Record } from './record';
+let converted =0;
 
 let preq: any = require('preq');
 
@@ -9,9 +10,12 @@ let preq: any = require('preq');
 function render(x: Record, stringifier: stringify.Stringifier) {
   if (x.mml) {
     stringifier.write(x);
+    converted++;
   } else {
     return preq.post({
-        uri: 'http://localhost:8080/convert',
+        uri: 'https://latexml.mediabotz.de/convert',
+        timeout: 30000,
+        retries: 3,
         body: {
           profile: 'zbl',
           tex: x.text,
@@ -19,6 +23,11 @@ function render(x: Record, stringifier: stringify.Stringifier) {
       },
     ).then((res: { body: { log: string, result: string }; }) => {
       x.mml = res.body.result;
+      stringifier.write(x);
+      console.log(`Converted ${converted++}`);
+    }).catch((e:any)=>{
+      console.log(`skip record ${x.id}. Error:`);
+      console.log(e);
       stringifier.write(x);
     });
   }
