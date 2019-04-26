@@ -4,27 +4,24 @@ import path = require( 'path');
 const mathml: any = require('mathml');
 import stringify = require('csv-stringify');
 import fs = require('fs');
-import { Record } from './record';
 import yaml = require('js-yaml');
 import xmlDom = require('xmldom');
 import xpath = require('xpath');
-let converted=0;
+import { Record } from './record';
+
+let converted = 0;
 
 const minimize = (mml: any) =>
   mathml(mml)
     .toMinimalPmml(['id', 'xref', 'alttext', 'display', 'class', 'kmcs-r', 'stretchy']).toString();
 
-function getMws(record: Record, docID: number, outFile: string) {
-  if (!record || !record.mml) {
-    console.log(`Skipping ${docID}`);
-    return;
-  }
+export function extract(mml: string, docID: number, outFile: string, collection: string = path.basename(outFile)) {
   const parser = new xmlDom.DOMParser();
-  const parsed = parser.parseFromString(record.mml);
+  const parsed = parser.parseFromString(mml);
   const select = xpath.useNamespaces({ 'm': 'http://www.w3.org/1998/Math/MathML' });
   const nodes = select('//m:math', parsed);
   if (nodes.length) {
-    let output = `<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="zbl" data-doc-id="${docID}" data-collection="${path.basename(outFile)}">`;
+    let output = `<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="zbl" data-doc-id="${docID}" data-collection="${collection}">`;
     let i = 0;
     nodes.forEach(n => output += `<mws:expr url="${docID}#${++i}">\n${minimize(n)}\n</mws:expr>`);
     output += '</mws:harvest>';
@@ -32,6 +29,14 @@ function getMws(record: Record, docID: number, outFile: string) {
     fs.writeFile(`${outFile}/${docID}.xml`, output, err => {
     });
   }
+}
+
+function getMws(record: Record, docID: number, outFile: string) {
+  if (!record || !record.mml) {
+    console.log(`Skipping ${docID}`);
+    return;
+  }
+  extract(record.mml, docID, outFile);
 
 }
 
@@ -61,7 +66,7 @@ export const Harvest = (ymlIds: string, inFile: string, outFile: string) => {
   one.then((dataset: Map<number, Record>) => {
     Object.keys(doc).map(key => {
       const result = (doc[key] || []).forEach((docID: number) => {
-        const record = <Record> dataset.get(docID);
+        const record = <Record>dataset.get(docID);
         let path = `${outFile}${key}`;
         if (!fs.existsSync(path)) {
           fs.mkdirSync(path);
