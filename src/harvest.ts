@@ -4,6 +4,7 @@ import path = require( 'path');
 // tslint:disable-next-line:no-var-requires
 const mathml: any = require('mathml');
 import fs = require('fs');
+import { promises } from 'fs';
 import yaml = require('js-yaml');
 import xmlDom = require('xmldom');
 import xpath = require('xpath');
@@ -26,9 +27,7 @@ export function extract(mml: string, docID: number, outFile: string, collection:
     nodes.forEach(n => output += `<mws:expr url="${docID}#${++i}">\n${minimize(n)}\n</mws:expr>`);
     output += '</mws:harvest>';
     // console.log(`Converted ${++converted}`);
-    // tslint:disable-next-line:no-empty
-    fs.writeFile(`${outFile}/${docID}.xml`, output, err => {
-    });
+    return promises.writeFile(`${outFile}/${docID}.xml`, output);
   }
 }
 
