@@ -4,7 +4,6 @@ import path = require( 'path');
 // tslint:disable-next-line:no-var-requires
 const mathml: any = require('mathml');
 import fs = require('fs');
-import { promises } from 'fs';
 import yaml = require('js-yaml');
 import xmlDom = require('xmldom');
 import xpath = require('xpath');
@@ -15,6 +14,20 @@ import { Record } from './record';
 const minimize = (mml: any) =>
   mathml(mml)
     .toMinimalPmml(['id', 'xref', 'alttext', 'display', 'class', 'kmcs-r', 'stretchy']).toString();
+
+
+// backwards compat to Node 8
+function writeFile(outPath: string, data: string) {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(outPath, data, 'utf8', err => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+}
 
 export function extract(mml: string, docID: number, outFile: string, collection: string = path.basename(outFile)) {
   const parser = new xmlDom.DOMParser();
@@ -27,7 +40,10 @@ export function extract(mml: string, docID: number, outFile: string, collection:
     nodes.forEach(n => output += `<mws:expr url="${docID}#${++i}">\n${minimize(n)}\n</mws:expr>`);
     output += '</mws:harvest>';
     // console.log(`Converted ${++converted}`);
-    return promises.writeFile(`${outFile}/${docID}.xml`, output);
+    return writeFile(`${outFile}/${docID}.xml`, output);
+  } else {
+    // no math nodes found
+    return new Promise((resolve) => resolve());
   }
 }
 
@@ -67,11 +83,11 @@ export const Harvest = (ymlIds: string, inFile: string, outFile: string) => {
     Object.keys(doc).map(key => {
       const result = (doc[key] || []).forEach((docID: number) => {
         const record = ds.get(docID) as Record;
-        const outPath = `${outFile}${key}`;
-        if (!fs.existsSync(outPath)) {
-          fs.mkdirSync(outPath);
+        const out = `${outFile}${key}`;
+        if (!fs.existsSync(out)) {
+          fs.mkdirSync(out);
         }
-        return getMws(record, docID, outPath);
+        return getMws(record, docID, out);
       });
       // console.log(result);
     });
