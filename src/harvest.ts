@@ -9,7 +9,7 @@ import xmlDom = require('xmldom');
 import xpath = require('xpath');
 import { Record } from './record';
 
-let converted = 0;
+// let converted = 0;
 
 const minimize = (mml: any) =>
   mathml(mml)
@@ -25,7 +25,7 @@ export function extract(mml: string, docID: number, outFile: string, collection:
     let i = 0;
     nodes.forEach(n => output += `<mws:expr url="${docID}#${++i}">\n${minimize(n)}\n</mws:expr>`);
     output += '</mws:harvest>';
-    console.log(`Converted ${++converted}`);
+    // console.log(`Converted ${++converted}`);
     fs.writeFile(`${outFile}/${docID}.xml`, output, err => {
     });
   }
@@ -33,7 +33,7 @@ export function extract(mml: string, docID: number, outFile: string, collection:
 
 function getMws(record: Record, docID: number, outFile: string) {
   if (!record || !record.mml) {
-    console.log(`Skipping ${docID}`);
+    // console.log(`Skipping ${docID}`);
     return;
   }
   extract(record.mml, docID, outFile);
@@ -48,12 +48,12 @@ export const Harvest = (ymlIds: string, inFile: string, outFile: string) => {
   const dataset: Map<number, Record> = new Map();
 
 
-  let recordSize = 0;
+  // let recordSize = 0;
   parser.on('readable', () => {
     let record;
     while (record = parser.read()) {
       dataset.set(record.id, record);
-      console.log('Read records ' + ++recordSize);
+      // console.log('Read records ' + ++recordSize);
     }
   });
   const one = new Promise<Map<number, Record>>((resolve, reject) => {
@@ -73,7 +73,7 @@ export const Harvest = (ymlIds: string, inFile: string, outFile: string) => {
         }
         return getMws(record, docID, path);
       });
-      console.log(result);
+      // console.log(result);
     });
   });
 
