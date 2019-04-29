@@ -1,8 +1,8 @@
 import parse = require('csv-parse');
 import path = require( 'path');
 
+// tslint:disable-next-line:no-var-requires
 const mathml: any = require('mathml');
-import stringify = require('csv-stringify');
 import fs = require('fs');
 import yaml = require('js-yaml');
 import xmlDom = require('xmldom');
@@ -26,6 +26,7 @@ export function extract(mml: string, docID: number, outFile: string, collection:
     nodes.forEach(n => output += `<mws:expr url="${docID}#${++i}">\n${minimize(n)}\n</mws:expr>`);
     output += '</mws:harvest>';
     // console.log(`Converted ${++converted}`);
+    // tslint:disable-next-line:no-empty
     fs.writeFile(`${outFile}/${docID}.xml`, output, err => {
     });
   }
@@ -42,7 +43,6 @@ function getMws(record: Record, docID: number, outFile: string) {
 
 export const Harvest = (ymlIds: string, inFile: string, outFile: string) => {
   const inStream = fs.createReadStream(inFile);
-  const stringifier = stringify({ header: true });
   const parser = parse({ columns: true, cast: true });
   const doc = yaml.safeLoad(fs.readFileSync(ymlIds, 'utf8'));
   const dataset: Map<number, Record> = new Map();
@@ -51,6 +51,7 @@ export const Harvest = (ymlIds: string, inFile: string, outFile: string) => {
   // let recordSize = 0;
   parser.on('readable', () => {
     let record;
+    // tslint:disable-next-line:no-conditional-assignment
     while (record = parser.read()) {
       dataset.set(record.id, record);
       // console.log('Read records ' + ++recordSize);
@@ -63,15 +64,15 @@ export const Harvest = (ymlIds: string, inFile: string, outFile: string) => {
 
   });
   inStream.pipe(parser);
-  one.then((dataset: Map<number, Record>) => {
+  one.then((ds: Map<number, Record>) => {
     Object.keys(doc).map(key => {
       const result = (doc[key] || []).forEach((docID: number) => {
-        const record = <Record>dataset.get(docID);
-        let path = `${outFile}${key}`;
-        if (!fs.existsSync(path)) {
-          fs.mkdirSync(path);
+        const record = ds.get(docID) as Record;
+        const outPath = `${outFile}${key}`;
+        if (!fs.existsSync(outPath)) {
+          fs.mkdirSync(outPath);
         }
-        return getMws(record, docID, path);
+        return getMws(record, docID, outPath);
       });
       // console.log(result);
     });
