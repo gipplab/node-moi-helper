@@ -9,5 +9,6 @@ before_script:
 script:
   - npm i && npm run build && npm test
 env:
-  - PGUSER = postgres
-  - PGDATABASE = moi_test
+  global:
+    - PGUSER = postgres
+    - PGDATABASE = moi_test
