@@ -8,4 +8,6 @@ before_script:
   - psql -c 'create database moi_test;' -U postgres
 script:
   - npm i && npm run build && npm test
-
+env:
+  - PGUSER = postgres
+  - PGDATABASE = moi_test
