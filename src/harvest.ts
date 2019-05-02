@@ -29,7 +29,7 @@ function writeFile(outPath: string, data: string) {
   });
 }
 
-export function extract(mml: string, docID: number, outFile: string, collection: string = path.basename(outFile)) {
+export function extract(mml: string, docID: string, outFile: string, collection: string = path.basename(outFile)) {
   const parser = new xmlDom.DOMParser();
   const parsed = parser.parseFromString(mml);
   const select = xpath.useNamespaces({ 'm': 'http://www.w3.org/1998/Math/MathML' });
@@ -52,8 +52,7 @@ function getMws(record: Record, docID: number, outFile: string) {
     // console.log(`Skipping ${docID}`);
     return;
   }
-  extract(record.mml, docID, outFile);
-
+  extract(record.mml, String(docID), outFile);
 }
 
 export const Harvest = (ymlIds: string, inFile: string, outFile: string) => {
