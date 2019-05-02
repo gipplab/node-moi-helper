@@ -2,11 +2,6 @@ language: node_js
 node_js:
 - 8
 - 11
-services:
-- docker
-before_install:
-- docker build -t moi-helper .
-- docker run -dp 8080:8080 moi-helper
 script:
-- npm i && npm test
+- npm i && npm run build && npm test
 
