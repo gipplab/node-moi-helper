@@ -1,0 +1,5 @@
+id	post_id	thread_id	type	formula
+1	9	1	comment	"<?xml version=""1.0"" encoding=""UTF-8""?><math xmlns=""http://www.w3.org/1998/Math/MathML"" alttext=""\pi"" display=""block"">  <mi>π</mi></math>"
+2	2453	1	answer	"<?xml version=""1.0"" encoding=""UTF-8""?><math xmlns=""http://www.w3.org/1998/Math/MathML"" alttext=""X"" display=""block"">  <mi>X</mi></math>"
+3	2453	1	answer	"<?xml version=""1.0"" encoding=""UTF-8""?><math xmlns=""http://www.w3.org/1998/Math/MathML"" alttext=""P(X)"" display=""block"">  <mrow>    <mi>P</mi>    <mo>⁢</mo>    <mrow>      <mo stretchy=""false"">(</mo>      <mi>X</mi>      <mo stretchy=""false"">)</mo>    </mrow>  </mrow></math>"
+4	2453	1	answer	"<?xml version=""1.0"" encoding=""UTF-8""?><math xmlns=""http://www.w3.org/1998/Math/MathML"" alttext=""f"" display=""block"">  <mi>f</mi></math>"
