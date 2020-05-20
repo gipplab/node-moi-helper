@@ -19,7 +19,7 @@ const minimize = (mml: any) =>
 // backwards compat to Node 8
 function writeFile(outPath: string, data: string) {
   return new Promise((resolve, reject) => {
-    fs.writeFile(outPath, data, 'utf8', err => {
+    fs.writeFile(outPath, data, { encoding: 'utf8', flag: 'a' }, err => {
       if (err) {
         reject(err);
       } else {
@@ -46,8 +46,6 @@ const processFile = (inFile: string, outFile: string) => {
   const parser = parse({ columns: true, cast: true, delimiter: '\t' });
   const dataset: Map<number, ArqRecord> = new Map();
   const collection = path.basename(outFile);
-  let output = `<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="mse" data-doc-id="${collection}" data-collection="${collection}">`;
-
   // let recordSize = 0;
   parser.on('readable', () => {
     let record;
@@ -56,6 +54,7 @@ const processFile = (inFile: string, outFile: string) => {
       dataset.set(record.id, record);
       // console.log('Read records ' + ++recordSize);
     }
+
   });
   const one = new Promise<Map<number, ArqRecord>>((resolve, reject) => {
     parser.on('end', () => {
@@ -64,11 +63,11 @@ const processFile = (inFile: string, outFile: string) => {
 
   });
   inStream.pipe(parser);
+  let output = '';
   one.then((ds: Map<number, ArqRecord>) => {
     for (const entry of ds.values()) {
       output += extract(entry.formula, String(entry.id));
     }
-    output += '</mws:harvest>';
     return writeFile(outFile, output);
   });
 
@@ -78,13 +77,17 @@ const processFile = (inFile: string, outFile: string) => {
 
 export const Arq2Hrvst = (inFile: string, outFile: string) => {
   const readdir = promisify(fs.readdir);
-  return readdir(inFile)
+  const consolidatedOut = path.join(outFile, 'out.xml');
+  const header = writeFile(consolidatedOut, '<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="mse" data-doc-id="consolidated" data-collection="00}">');
+  return header.then(() => readdir(inFile))
     .then(files => {
       const pq: any[] = [];
       files.forEach(file => {
-        pq.push(processFile(path.join(inFile, file), path.join(outFile, file + '.xml')));
+        pq.push(processFile(path.join(inFile, file), consolidatedOut));
       });
       return pq;
     })
-    .then(pq => Promise.all(pq).then(() => (pq.length)));
+    .then(pq => Promise.all(pq)
+      .then(() => (writeFile(consolidatedOut, '</mws:harvest>')))
+      .then(() => pq.length));
 };
