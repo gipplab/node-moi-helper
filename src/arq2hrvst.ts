@@ -86,7 +86,7 @@ export const Arq2Hrvst = (inFile: string, outFile: string) => {
     .map(file => {
       count++;
       return processFile(path.join(inFile, file as string), consolidatedOut);
-    })
+    }, {concurrency: 20})
     .then(() => (writeFile(consolidatedOut, '</mws:harvest>\n')))
     .then(() => count);
 };
