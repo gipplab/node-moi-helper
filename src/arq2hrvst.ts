@@ -8,6 +8,7 @@ import xmlDom = require('xmldom');
 import xpath = require('xpath');
 import { ArqRecord } from './arqRecord';
 import { promisify } from 'util';
+import Promise = require('bluebird');
 
 // let converted = 0;
 
@@ -29,7 +30,7 @@ function writeFile(outPath: string, data: string) {
   });
 }
 
-export function extract(mml: string, url: string, postId:number ) {
+export function extract(mml: string, url: string, postId: number) {
   const parser = new xmlDom.DOMParser();
   const parsed = parser.parseFromString(mml);
   const select = xpath.useNamespaces({ 'm': 'http://www.w3.org/1998/Math/MathML' });
@@ -76,18 +77,16 @@ const processFile = (inFile: string, outFile: string) => {
 };
 
 export const Arq2Hrvst = (inFile: string, outFile: string) => {
-  const readdir = promisify(fs.readdir);
+  const afs = Promise.promisifyAll(fs);
   const consolidatedOut = path.join(outFile, 'out.xml');
   const header = writeFile(consolidatedOut, '<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="mse" data-doc-id="consolidated" data-collection="00}">\n');
-  return header.then(() => readdir(inFile))
-    .then(files => {
-      const pq: any[] = [];
-      files.forEach(file => {
-        pq.push(processFile(path.join(inFile, file), consolidatedOut));
-      });
-      return pq;
+  let count = 0;
+  // @ts-ignore
+  return header.then(() => afs.readdirAsync(inFile))
+    .map(file => {
+      count++;
+      return processFile(path.join(inFile, file as string), consolidatedOut);
     })
-    .then(pq => Promise.all(pq)
-      .then(() => (writeFile(consolidatedOut, '</mws:harvest>\n')))
-      .then(() => pq.length));
+    .then(() => (writeFile(consolidatedOut, '</mws:harvest>\n')))
+    .then(() => count);
 };
