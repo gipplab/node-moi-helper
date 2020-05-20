@@ -29,14 +29,14 @@ function writeFile(outPath: string, data: string) {
   });
 }
 
-export function extract(mml: string, url: string) {
+export function extract(mml: string, url: string, postId:number ) {
   const parser = new xmlDom.DOMParser();
   const parsed = parser.parseFromString(mml);
   const select = xpath.useNamespaces({ 'm': 'http://www.w3.org/1998/Math/MathML' });
   const nodes = select('//m:math', parsed);
   let output = '';
   if (nodes.length) {
-    nodes.forEach(n => output += `<mws:expr url="${url}">\n${minimize(n)}\n</mws:expr>`);
+    nodes.forEach(n => output += `<mws:expr url="${url}" data-post-id="${postId}">\n${minimize(n)}\n</mws:expr>`);
   }
   return output;
 }
@@ -66,7 +66,7 @@ const processFile = (inFile: string, outFile: string) => {
   let output = '';
   one.then((ds: Map<number, ArqRecord>) => {
     for (const entry of ds.values()) {
-      output += extract(entry.formula, String(entry.id));
+      output += extract(entry.formula, String(entry.id), entry.post_id);
     }
     return writeFile(outFile, output);
   });
@@ -78,7 +78,7 @@ const processFile = (inFile: string, outFile: string) => {
 export const Arq2Hrvst = (inFile: string, outFile: string) => {
   const readdir = promisify(fs.readdir);
   const consolidatedOut = path.join(outFile, 'out.xml');
-  const header = writeFile(consolidatedOut, '<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="mse" data-doc-id="consolidated" data-collection="00}">');
+  const header = writeFile(consolidatedOut, '<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="mse" data-doc-id="consolidated" data-collection="00}">\n');
   return header.then(() => readdir(inFile))
     .then(files => {
       const pq: any[] = [];
@@ -88,6 +88,6 @@ export const Arq2Hrvst = (inFile: string, outFile: string) => {
       return pq;
     })
     .then(pq => Promise.all(pq)
-      .then(() => (writeFile(consolidatedOut, '</mws:harvest>')))
+      .then(() => (writeFile(consolidatedOut, '</mws:harvest>\n')))
       .then(() => pq.length));
 };
