@@ -7,8 +7,13 @@ import fs = require('fs');
 import xmlDom = require('xmldom');
 import xpath = require('xpath');
 import { ArqRecord } from './arqRecord';
-import { promisify } from 'util';
 import Promise = require('bluebird');
+import debug = require('debug');
+
+const log = debug('arq2hrvst');
+const vlog = debug('verbose')
+const afs = Promise.promisifyAll(fs);
+
 
 // let converted = 0;
 
@@ -17,17 +22,9 @@ const minimize = (mml: any) =>
     .toMinimalPmml('all').toString();
 
 
-// backwards compat to Node 8
-function writeFile(outPath: string, data: string) {
-  return new Promise((resolve, reject) => {
-    fs.writeFile(outPath, data, { encoding: 'utf8', flag: 'a' }, err => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
+function writeFile(outPath: string, data: string, options:{} = { encoding: 'utf8', flag: 'a' }) {
+  // @ts-ignore
+  return afs.writeFileAsync(outPath, data, options).then(() => vlog('wrote to file'));
 }
 
 export function extract(mml: string, url: string, postId: number) {
@@ -65,28 +62,31 @@ const processFile = (inFile: string, outFile: string) => {
   });
   inStream.pipe(parser);
   let output = '';
-  one.then((ds: Map<number, ArqRecord>) => {
+  return one.then((ds: Map<number, ArqRecord>) => {
     for (const entry of ds.values()) {
       output += extract(entry.formula, String(entry.id), entry.post_id);
     }
+    vlog("Plan to write entries from %o", inFile);
     return writeFile(outFile, output);
   });
 
-  return one;
-
 };
 
-export const Arq2Hrvst = (inFile: string, outFile: string) => {
-  const afs = Promise.promisifyAll(fs);
+export const Arq2Hrvst = (inFile: string, outFile: string): any => {
   const consolidatedOut = path.join(outFile, 'out.xml');
-  const header = writeFile(consolidatedOut, '<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="mse" data-doc-id="consolidated" data-collection="00}">\n');
+  const header = writeFile(
+    consolidatedOut,
+    '<mws:harvest xmlns:mws="http://search.mathweb.org/ns" data-set="mse" data-doc-id="consolidated" data-collection="00">\n',
+    { encoding: 'utf8'}
+  );
   let count = 0;
   // @ts-ignore
   return header.then(() => afs.readdirAsync(inFile))
-    .map(file => {
+    .map((file:string) => {
       count++;
+      log('schedule file %o total %d', file, count);
       return processFile(path.join(inFile, file as string), consolidatedOut);
-    }, {concurrency: 20})
+    }, { concurrency: 20  })
     .then(() => (writeFile(consolidatedOut, '</mws:harvest>\n')))
     .then(() => count);
 };

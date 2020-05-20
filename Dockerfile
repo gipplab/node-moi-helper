@@ -10,3 +10,4 @@ RUN npm install
 COPY . .
 RUN npm run-script build
 ENV NODE_OPTIONS="--max-old-space-size=16384"
+ENV DEBUG=arq2hrvst
