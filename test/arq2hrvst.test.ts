@@ -10,6 +10,12 @@ describe('Harvest', () => {
         expect(data).equal(2));
     },
   );
+  it('generate an harvest file ignoring errors', () => {
+      return Arq2Hrvst(__dirname + '/data/arq-fail',  __dirname + '/data/arqout' )
+        .then((data:number) =>
+        expect(data).equal(1));
+    },
+  );
 });
 
 
