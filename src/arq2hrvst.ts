@@ -11,7 +11,7 @@ import Promise = require('bluebird');
 import debug = require('debug');
 
 const log = debug('arq2hrvst');
-const vlog = debug('verbose')
+const vlog = debug('verbose');
 const afs = Promise.promisifyAll(fs);
 
 
@@ -48,24 +48,34 @@ const processFile = (inFile: string, outFile: string) => {
       return {
         next() {
           const record = parser.read();
-          if (record){
-            return {value: record, done:false}
+          if (record) {
+            return { value: record, done: false };
           }
-          return {value: undefined, done: true}
+          return { value: undefined, done: true };
         },
       };
     },
   };
   const dataset: Map<number, ArqRecord> = new Map();
   const collection = path.basename(inFile);
-  // let recordSize = 0;
+  let recordSize = 0;
   parser.on('readable', () => {
-
-    // tslint:disable-next-line:no-conditional-assignment
-    for (const record of iterable) {
-      dataset.set(record.id, record);
-      // console.log('Read records ' + ++recordSize);
-    }
+    let blockSize = 0;
+    return Promise.map(iterable, (entry: ArqRecord) => {
+      ++blockSize;
+      try {
+        if (entry.formula)
+          return extract(entry.formula, String(entry.id), entry.post_id);
+        log('No formula in line %o', recordSize + blockSize, entry.formula);
+      } catch (e) {
+        log('Problem in line %o: %O', recordSize + blockSize, entry.formula);
+      }
+    }, { concurrency: 1000 }).reduce((all, next) => all + next, '')
+      .then((data) => writeFile(outFile, data))
+      .then(() => {
+        log('Read %o-block starting from %o in %o.', blockSize, recordSize, collection);
+        recordSize += blockSize;
+      });
 
   });
   const one = new Promise<Map<number, ArqRecord>>((resolve, reject) => {
@@ -75,17 +85,7 @@ const processFile = (inFile: string, outFile: string) => {
 
   });
   inStream.pipe(parser);
-  let output = '';
-  return one
-    .then((ds: Map<number, ArqRecord>) => {
-    log('processing %o elements from %o', ds.size, collection);
-    for (const entry of ds.values()) {
-      output += extract(entry.formula, String(entry.id), entry.post_id);
-    }
-    vlog('Plan to write entries from %o', inFile);
-    return writeFile(outFile, output);
-  });
-
+  return one;
 };
 
 export const Arq2Hrvst = (inFile: string, outFile: string): any => {
