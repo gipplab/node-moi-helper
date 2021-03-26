@@ -79,7 +79,9 @@ export const Harvest = (ymlIds: string, inFile: string, outFile: string) => {
   });
   inStream.pipe(parser);
   one.then((ds: Map<number, Record>) => {
+    // @ts-ignore
     Object.keys(doc).map(key => {
+      // @ts-ignore
       const result = (doc[key] || []).forEach((docID: number) => {
         const record = ds.get(docID) as Record;
         const out = `${outFile}${key}`;

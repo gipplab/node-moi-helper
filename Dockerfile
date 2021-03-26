@@ -1,5 +1,5 @@
 # specify the node base image with your desired version node:<version>
-FROM node:lts
+FROM node:10
 RUN apt-get update && apt-get install -y \
   libpq-dev \
    g++ \

@@ -4,7 +4,7 @@ import fs = require('fs');
 import { Record } from './record';
 let converted =0;
 
-let preq: any = require('preq');
+const preq: any = require('preq');
 
 
 function render(x: Record, stringifier: stringify.Stringifier) {
@@ -13,7 +13,7 @@ function render(x: Record, stringifier: stringify.Stringifier) {
     converted++;
   } else {
     return preq.post({
-        uri: 'https://latexml.mediabotz.de/convert',
+        uri: 'https://latexml.formulasearchengine.com/convert',
         timeout: 30000,
         retries: 3,
         body: {
